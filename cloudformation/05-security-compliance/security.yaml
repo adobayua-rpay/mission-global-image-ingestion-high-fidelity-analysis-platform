@@ -1,0 +1,37 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Security & Compliance: WAF, GuardDuty, AWS Config Rules.'
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+Resources:
+  WafAcl:
+    Type: 'AWS::WAFv2::WebACL'
+    Properties:
+      Name: !Sub '${Environment}-ApiGateway-WAF'
+      Scope: REGIONAL
+      DefaultAction: { Allow: {} }
+      VisibilityConfig:
+        CloudWatchMetricsEnabled: true
+        MetricName: !Sub '${Environment}-ApiGateway-WAF-Metrics'
+        SampledRequestsEnabled: true
+      Rules:
+        - Name: 'AWS-AWSManagedRulesCommonRuleSet'
+          Priority: 10
+          Statement:
+            ManagedRuleGroupStatement:
+              VendorName: 'AWS'
+              Name: 'AWSManagedRulesCommonRuleSet'
+          OverrideAction: { None: {} }
+          VisibilityConfig:
+            CloudWatchMetricsEnabled: true
+            MetricName: 'waf-common-rules'
+            SampledRequestsEnabled: true
+
+  S3PublicAccessBlockedRule:
+    Type: 'AWS::Config::ConfigRule'
+    Properties:
+      ConfigRuleName: 's3-bucket-public-read-prohibited'
+      Source:
+        Owner: AWS
+        SourceIdentifier: 'S3_BUCKET_PUBLIC_READ_PROHIBITED'
