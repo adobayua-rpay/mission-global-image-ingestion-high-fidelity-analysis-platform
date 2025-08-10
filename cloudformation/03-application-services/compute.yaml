@@ -1,0 +1,26 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Application Services: Lambda Functions and EC2 ASG for processing.'
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+Resources:
+  ImageUploadFunction:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      FunctionName: !Sub '${Environment}-ImageUploadFunction'
+      Handler: 'index.handler'
+      Role: !ImportValue '${Environment}-LambdaExecutionRoleArn'
+      Code:
+        S3Bucket: !Sub '${Environment}-lambda-code-bucket'
+        S3Key: 'ImageUploadFunction.zip'
+      Runtime: 'python3.9'
+      # ... Other Lambda configs: Memory, Timeout, VPC ...
+
+  AnalysisASG:
+    Type: 'AWS::AutoScaling::AutoScalingGroup'
+    Properties:
+      # ... ASG configuration with Launch Template using Graviton instances ...
+      MinSize: '2'
+      MaxSize: '50' # Scaled based on load
+      DesiredCapacity: '2'
