@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Data Services: DynamoDB tables for metadata.'
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+Resources:
+  ImageMetadataTable:
+    Type: 'AWS::DynamoDB::Table'
+    Properties:
+      TableName: !Sub '${Environment}-ImageMetadata'
+      AttributeDefinitions:
+        - AttributeName: 'ImageID'
+          AttributeType: 'S'
+      KeySchema:
+        - AttributeName: 'ImageID'
+          KeyType: 'HASH'
+      BillingMode: PAY_PER_REQUEST
+      SSESpecification:
+        SSEEnabled: true
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true

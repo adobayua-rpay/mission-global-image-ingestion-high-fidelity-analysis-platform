@@ -1,0 +1,36 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Data Services: S3 buckets for image storage.'
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+  KmsKeyArn:
+    Type: String
+Resources:
+  RawImagesBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !Sub '${Environment}-image-platform-raw-${AWS::AccountId}'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: 'aws:kms'
+              KMSMasterKeyID: !Ref KmsKeyArn
+      LifecycleConfiguration:
+        Rules:
+          - ID: IntelligentTiering
+            Status: Enabled
+            Transitions:
+              - StorageClass: INTELLIGENT_TIERING
+                TransitionInDays: 0
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  AnalyzedImagesBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !Sub '${Environment}-image-platform-analyzed-${AWS::AccountId}'
+      # ... Similar configuration to RawImagesBucket ...
